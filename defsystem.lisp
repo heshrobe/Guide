@@ -50,7 +50,9 @@
    ;; recipes-core
    ("package-definition")
    ("objects" (:module-class separate-destination-joshua-module))
+   ("preliminaries" (:module-class separate-destination-joshua-module))
    ("predicates" (:module-class separate-destination-joshua-module))
    ("actions" (:module-class separate-destination-joshua-module))
-   ("story-understanding" (:module-class separate-destination-joshua-module)) 
+   ("story-1-processing" (:module-class separate-destination-joshua-module))
+   ("story-2-processing" (:module-class separate-destination-joshua-module))
    ))

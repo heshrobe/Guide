@@ -11,6 +11,15 @@
   :post-conditions ([is-moving-around ?person ?vacinity]) 
   )
 
+(define-action move-to (?person ?current-vacinity ?destination)
+  :typing ((?current-vacinity vacinity)
+           (?destination vacinity)
+           (?person person))
+  :prerequisites ([is-in-vacinity ?person ?current-vacinity]
+                  [is-in-condition ?person mobile])
+  :post-conditions ([not [is-in-vacinity ?person ?current-vacinity]]
+                    [is-in-vacinity ?person ?destination]))
+
 (define-fwrd-stateful-rule moving-means-not-on-freeze-tile
     :if [and [is-moving-around ?person ?someplace]
              [object-type-of ?person person]
@@ -92,6 +101,40 @@
   :prerequisites ([is-in-condition ?person mobile])
   :post-conditions ([is-in-condition ?person working]))
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; From Story-2
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-action discover (?person ?victim)
+  :typing ((?person person)
+           (?victim person))
+  :prerequisites ([is-searching-for ?person ?])
+  :post-conditions ([has-discovered ?person ?victim]))
+
+(define-action announce (?person ?announcement)
+  :typing ((?person person))
+  :prerequisites ()
+  :post-conditions ([has-announced ?person ?announcement]))
 
 
-
+(define-action provide-care-to-critical-victim (?actor ?victim ?helpers ?vacinity)
+  :typing ((?actor person)
+           (?victim person)
+           (?helpers collection)
+           (?vacinity vacinity))
+  :bindings ([is-in-vacinity ?victim ?vacinity])  
+  :prerequisites (;; [value-of (?helpers member-type) person]
+                  ;; [value-of (?actor member-of) ?helpers]
+                  ;; these aren't stateful but action compiler makes them so
+                  ;; make sure that check one prerequisite handles lisp calls correctly
+                  (>= (quantity ?helpers) 3)
+                  (eql (typical-member ?helpers) ?actor)
+                  [is-in-vacinity ?helpers ?vacinity]
+                  [is-in-vacinity ?actor ?vacinity]
+                  ;; MEDKIT?
+                  )
+  :post-conditions ([has-provided-care ?actor ?victim]))

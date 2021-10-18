@@ -22,3 +22,25 @@
 
 (define-recipe-predicate is-in-possession-of (agent object) ())
 
+(define-recipe-predicate is-searching-for (person victims) ())
+
+(define-recipe-predicate has-discovered (actor victim) ())
+
+(define-recipe-predicate has-announced (person predication) ())
+
+(define-recipe-predicate has-begun (person predication) ())
+
+;;; The things needed is an object like help or clear
+(define-recipe-predicate needs (actor thing-needed &rest other-stuff) ())
+
+(define-recipe-predicate purpose (thing1 thing2) ())
+
+(define-recipe-predicate helps (person thing) ())
+
+(define-recipe-predicate provides (actor thing recipient) ())
+
+(Define-recipe-predicate is-on-way (actor destination) ())
+
+(define-recipe-predicate is-holding (actor thing) ())
+
+(define-recipe-predicate has-provided-care (actor victim) ())

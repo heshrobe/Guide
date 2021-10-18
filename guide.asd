@@ -47,7 +47,9 @@
   :components
   ((:file "package-definition")
    (:joshua-file "objects" :depends-on ("package-definition"))
+   (:joshua-file "preliminaries" :depends-on ("objects"))
    (:joshua-file "predicates" :depends-on ("objects"))
    (:joshua-file "actions" :depends-on ("predicates"))
-   (:joshua-file "story-understanding" :depends-on ("actions"))
+   (:joshua-file "story-1-processing" :depends-on ("actions"))
+   (:joshua-file "story-2-processing" :depends-on ("actions"))
    ))
