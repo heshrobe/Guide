@@ -8,7 +8,7 @@
   :prerequisites ([is-in-condition ?person mobile]
                   [is-in-vacinity ?person ?vacinity]
                   )
-  :post-conditions ([is-moving-around ?person ?vacinity]) 
+  :post-conditions ([is-moving-around ?person ?vacinity])
   )
 
 (define-action move-to (?person ?current-vacinity ?destination)
@@ -32,10 +32,10 @@
   :prerequisites ([is-in-condition ?person mobile]
                   [not [is-standing-on ?person ?place]]
                   )
-  :post-conditions ([is-standing-on ?person ?place]) 
+  :post-conditions ([is-standing-on ?person ?place])
   )
 
-(define-fwrd-stateful-rule standing-on-freeze-means-immobile 
+(define-fwrd-stateful-rule standing-on-freeze-means-immobile
     :If [and [is-standing-on ?person ?floor-tile]
              [object-type-of ?person person]
              [object-type-of ?floor-type freeze-tile]]
@@ -126,7 +126,7 @@
            (?victim person)
            (?helpers collection)
            (?vacinity vacinity))
-  :bindings ([is-in-vacinity ?victim ?vacinity])  
+  :bindings ([is-in-vacinity ?victim ?vacinity])
   :prerequisites (;; [value-of (?helpers member-type) person]
                   ;; [value-of (?actor member-of) ?helpers]
                   ;; these aren't stateful but action compiler makes them so
@@ -138,3 +138,37 @@
                   ;; MEDKIT?
                   )
   :post-conditions ([has-provided-care ?actor ?victim]))
+
+
+
+;;; from Study-3
+;;; Story-1
+
+(define-action scout-out (?actor ?location)
+  :typing ((?actor person)
+           (?location vacinity))
+  :prerequisites ([free-to-scout ?actor])
+  :post-conditions ([scouted ?actor ?location]))
+
+(define-action mark (?actor ?location)
+  :typing ((?actor person)
+           (?location vacinity))
+  :prerequisites ([free-to-scout ?actor])
+  :post-conditions ([marked ?actor ?location]))
+
+;;; from story-2
+
+(define-action mutually-share-information (?collection)
+  :typing ((?collection collection))
+  :prerequisites ([value-of (?collection member-type) player])
+  :post-conditions ([has-shared-information ?collection])
+  )
+
+(define-action go-to-care-giving-site (?actors ?place)
+  :typing ((?actors collection)
+           (?place vacinity))
+  :prerequisites ([value-of (?actors member-type) player]
+                  [can-be-given-at ?place care]
+                  [has-shared-information ?actors])
+  :post-conditions ([is-in-vacinity ?actors ?place])
+  )

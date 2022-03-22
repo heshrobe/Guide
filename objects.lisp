@@ -5,7 +5,7 @@
 (define-recipe-object-type describes-self-mixin
     )
 
-(defgeneric describe-self (object))
+(defgeneric describe-self (object &optional state))
 
 (define-recipe-object-type can-be-typical-mixin
     :slots ((is-typical? :Initarg :is-typical?)
@@ -37,7 +37,8 @@
 ;;; this really ought to be on is-typical mixin
 ;;; but I need to think through the method combination
 ;;; more if so.
-(defmethod describe-self ((thing person))
+(defmethod describe-self ((thing person) &optional (state (intern-state 'initial)))
+  (declare (ignore state))
   (let ((member-of nil)
         (is-typical? nil))
     (ask* `[value-of (,thing member-of) ?class]
@@ -47,6 +48,15 @@
     `(person :name ,(role-name thing)
              ,@(when member-of `(:member-of ,member-of))
              ,@(when is-typical? `(:typical-member yes)))))
+
+(define-recipe-object-type player
+    :super-types (person)
+    )
+
+(define-recipe-object-type victim
+    :super-types (person)
+    :slots ((needs-transporting :initform t :initarg :needs-transporting))
+    )
 
 (define-recipe-object-type tool
     :super-types (can-be-typical-mixin)
@@ -59,24 +69,26 @@
     :super-types (vacinity))
 
 (define-recipe-object-type collection
-    :super-types (describes-self-mixin)
+    :super-types (abstract-thing describes-self-mixin)
     :slots ((quantity :initarg :quantity)
             (member-type :initarg :member-type)
             (typical-member :initarg :typical-member)
-            (members :initarg :members)))
+            (members :initarg :members :set-valued t)))
 
-(Defmethod describe-self ((thing symbol)) thing)
+(Defmethod describe-self ((thing symbol) &optional (state nil))
+  (declare (ignore state))
+  thing)
 
-(defmethod describe-self ((thing collection))
+(defmethod describe-self ((thing collection) &optional (state (intern-state 'initial)))
   (let ((size nil)
         (typical-member nil)
         (members nil))
-    (ask* `[value-of (,thing quantity) ?quantity]
+    (ask* `[in-state [value-of (,thing quantity) ?quantity] ,state]
           (setq size `(:size ,(if (numberp ?quantity) ?quantity (printable-version ?quantity)))))
-    (ask* `[value-of (,thing typical-member) ?member]
+    (ask* `[in-state [value-of (,thing typical-member) ?member] ,state]
           (setq typical-member (role-name ?member)))
-    (ask* `[value-of (,thing members) ?members]
-          (setq members (mapcar #'role-name ?members)))
+    (ask* `[in-state [value-of (,thing members) ?member] ,state]
+          (push (start::convert-start-string-to-lisp-atom (role-name ?member)) members))
     `(collection :name ,(printable-version (role-name thing))
                  :type ,(printable-version (member-type thing))
                  ,@size
@@ -84,7 +96,9 @@
                  ,@(when members `(:Members ,members))
                  )))
 
-(defmethod describe-self ((thing recipe-object)) (role-name thing))
+(defmethod describe-self ((thing recipe-object) &optional state)
+  (declare (ignore state))
+  (role-name thing))
 
 (defun printable-version (start-symbol)
   (intern (string-upcase start-symbol)))
@@ -120,28 +134,28 @@
             (recipient :initarg :recipient))
     )
 
-(defmethod describe-self ((thing care))
+(defmethod describe-self ((thing care) &optional (state (intern-state 'initial)))
   (let ((provider nil)
         (recipient nil))
-    (ask* `[value-of (,thing provider) ?provider]
+    (ask* `[in-state [value-of (,thing provider) ?provider] ,state]
           (setq provider `(:provider ,(Role-name ?provider))))
-    (ask* `[value-of (,thing recipient) ?recipient]
+    (ask* `[in-state [value-of (,thing recipient) ?recipient] ,state]
           (setq recipient `(:recipient ,(role-name ?recipient))))
     `(care :name ,(printable-version (role-name thing))
            ,@provider
            ,@recipient)))
 
-(define-recipe-object-type help 
+(define-recipe-object-type help
     :super-types (abstract-thing)
     :slots ((provider :initarg :provider)
             (recipient :initarg :recipient)))
-                   
-(defmethod describe-self ((thing help))
+
+(defmethod describe-self ((thing help) &optional (state (intern-state 'initial)))
   (let ((provider nil)
         (recipient nil))
-    (ask* `[value-of (,thing recipient) ?value]
+    (ask* `[in-state [value-of (,thing recipient) ?value] ,state]
           (setq recipient ?value))
-    (ask* `[value-of (,thing provider) ?value]
+    (ask* `[in-state [value-of (,thing provider) ?value] ,state]
           (setq provider ?value))
     `(help :name ,(role-name thing)
            ,@(when provider `(:provider ,(printable-version (role-name provider))))

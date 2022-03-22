@@ -44,3 +44,19 @@
 (define-recipe-predicate is-holding (actor thing) ())
 
 (define-recipe-predicate has-provided-care (actor victim) ())
+
+
+
+;;; from study 3
+
+(define-recipe-predicate have (subject object) ())
+(define-recipe-predicate there-is (variable-list predicate) ())
+(define-recipe-predicate for-all (variable-list predicate) ())
+(define-recipe-predicate implies (premise conclusion) ())
+(define-recipe-predicate instance-of (thing type) ())
+(define-recipe-predicate free-to-scout (person) ())
+(define-recipe-predicate scouted (person place) ())
+(define-recipe-predicate marked (person place) ())
+(define-recipe-predicate has-shared-information (collection) ())
+(define-recipe-predicate contains (thing stuff) ())
+(define-recipe-predicate can-be-given-at (thing place) ())
