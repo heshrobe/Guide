@@ -47,12 +47,52 @@
                (not (null referent)))
       (follow-path (list (full-name referent))))))
 
-(defun is-quantified (instance)
-  (ask* `[texp-match ? :subject ,instance :relation-name |has_quantifier| :object-name ?quantification]
-        (return-from is-quantified ?quantification))
-  nil)
+(defun has-quantification (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_quantifier| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_quantifier| :object-name ?quantification]
+              (setq answer ?quantification)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
+(defun has-quantity (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_quantity| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_quantity| :object-name ?quantification]
+              (setq answer ?quantification)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
+(defun has-number (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_number| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_number| :object-name ?quantification]
+              (setq answer ?quantification)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
+(defun has-determiner (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_det| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_det| :object-name ?quantification]
+              (setq answer ?quantification)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
 
 (defun has-relative-clause (thing)
   (ask* `[texp-match ? :subject ,thing :relation-name |has_rel_clause| :object ?rel-clause]
         (return-from has-relative-clause ?rel-clause))
   nil)
+
+(defun short-name (thing)
+  (if (symbolp thing)
+      (convert-start-string-to-lisp-atom thing)
+    (convert-start-string-to-lisp-atom (name thing))))

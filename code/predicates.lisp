@@ -60,3 +60,8 @@
 (define-recipe-predicate has-shared-information (collection) ())
 (define-recipe-predicate contains (thing stuff) ())
 (define-recipe-predicate can-be-given-at (thing place) ())
+(define-recipe-predicate is-providing-care (actor victim) ())
+(define-recipe-predicate saved (victim) ())
+(define-recipe-predicate realize (who what) ())
+(define-recipe-predicate not-realize (who what) ())
+(define-recipe-predicate wasted (what) ())

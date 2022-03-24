@@ -53,9 +53,14 @@
     :super-types (person)
     )
 
+(define-recipe-object-type medical-specialist
+    :super-types (player)
+    )
+
 (define-recipe-object-type victim
     :super-types (person)
-    :slots ((needs-transporting :initform t :initarg :needs-transporting))
+    :slots ((needs-transporting :initform t :initarg :needs-transporting)
+            (treatment-team :initarg :treatment-team))
     )
 
 (define-recipe-object-type tool
@@ -96,9 +101,30 @@
                  ,@(when members `(:Members ,members))
                  )))
 
+;;; Slight problem with the initform here.
+;;; The way Joshua deals with this is that each
+;;; subtype calls its parent's initializer
+;;; which tells the initform
+;;; but if the subtype also has an initform
+;;; it tells it too and then there's a conflict.
+;;; I guess because both are justified as assumptions
+;;; automatic retraction doesn't work
+(define-recipe-object-type team
+    :super-types (collection)
+    :slots ((member-type :initform 'player)))
+
 (defmethod describe-self ((thing recipe-object) &optional state)
   (declare (ignore state))
   (role-name thing))
+
+;;; A treatment team must have one medical specialist
+;;; and at least one other player
+;;; The other player can be any type
+;;; so we just inherit player as the member type
+(define-recipe-object-type treatment-team
+    :super-types (team)
+    :slots ()
+    )
 
 (defun printable-version (start-symbol)
   (intern (string-upcase start-symbol)))

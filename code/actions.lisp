@@ -172,3 +172,10 @@
                   [has-shared-information ?actors])
   :post-conditions ([is-in-vacinity ?actors ?place])
   )
+
+(define-action give-care (?team ?victim)
+  :typing ((?team treatment-team)
+           (?victim victim))
+  :bindings ([is-in-vacinity ?victim ?victim-place])
+  :prerequisites ([is-in-vacinity ?team ?victim-place])
+  :post-conditions ([is-providing-care ?team ?victim]))

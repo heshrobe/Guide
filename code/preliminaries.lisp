@@ -24,11 +24,11 @@
 ;;; Only want to do this at load time, not compile time
 ;;; Story #1 the freeze tile
 
-(defmacro defdecoder (verb &key return-args pattern handler-name decoder-name)
+(defmacro defdecoder (verb &key return-args pattern handler-name decoder-name new-main)
   (let ((handler-name (or handler-name (smash "-"  verb 'handler)))
         (decoder-name (or decoder-name (smash "-" verb 'decoder))))
     `(defrule ,decoder-name (:backward)
-       then [is-appropriate-response ,verb ?main ,handler-name ,return-args]
+       then [is-appropriate-response ,verb ?main ,handler-name ,new-main ,return-args]
        if ,pattern)))
 
 (defmacro defhandler (name args &body body)
@@ -161,14 +161,14 @@
         (*embedding-context* nil))
     (labels ((handle-sentence (main verb)
                (setq verb (start::convert-start-string-to-lisp-atom verb))
-               (ask* `[is-appropriate-response ,verb ,main ?handler ?args]
+               (ask* `[is-appropriate-response ,verb ,main ?handler ?new-main ?args]
                      ;; (format t "~%Response is ~a ~a ~a ~a" verb main ?handler ?args)
                      (let ((putative-next-state (apply (joshua-logic-variable-value ?handler)
-                                                       main
+                                                       (if (unbound-logic-variable-p ?new-main) main ?new-main)
                                                        (copy-object-if-necessary ?args))))
                        ;; make sure that the handler returned a state like it's supposed to
                        ;; But it's possible that the handler didn't actually make a state change
-                       ;; in which case it should return nil to indicate that
+                       ;; in which case it should return the previous current state to indicate that
                        (assert (typep putative-next-state 'state))
                        ;; but it's possible that something asserted by an action could
                        ;; cause another action to follow on.  For example, if an announcement is
