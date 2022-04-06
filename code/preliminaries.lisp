@@ -5,11 +5,27 @@
 (eval-when (:compile-toplevel :load-toplevel)
   (defvar *stories* (make-hash-table)))
 
-(defun fetch-story (name) (gethash name *stories*))
+(defclass story ()
+  ((utterances :accessor utterances :Initform nil :initarg :utterances)
+   (background-knowledge :accessor background-knowledge :Initform nil :initarg :background-knowledge)))
 
-(defmacro defstory (name &body utterances)
+(defmacro defstory (name &key utterances background-knowledge)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (setf (gethash ',name *stories*) (list ,@utterances))))
+     (setf (gethash ',name *stories*)
+       (make-instance 'story
+         :utterances (list ,@utterances)
+         :background-knowledge (list ,@background-knowledge)))))
+
+(defun fetch-story (name) (utterances (gethash name *stories*)))
+
+(defun story-background-knowledge (name) (background-knowledge (gethash name *stories*)))
+
+(defun check-story-parse (name)
+  (loop for sentence in (fetch-story name)
+      do (print sentence)
+         (let ((parse (parse sentence)))
+           (print (viz parse)))))
+
 
 ;;; This just has different defaults from parse-text
 (defun parse (string &key (server "asist") (kb "yes") (format :xml))
@@ -24,11 +40,15 @@
 ;;; Only want to do this at load time, not compile time
 ;;; Story #1 the freeze tile
 
+(defparameter *all-decoders* nil)
+
 (defmacro defdecoder (verb &key return-args pattern handler-name decoder-name new-main)
   (let ((handler-name (or handler-name (smash "-"  verb 'handler)))
-        (decoder-name (or decoder-name (smash "-" verb 'decoder))))
+        (decoder-name (or decoder-name (smash "-" verb 'decoder)))
+        (new-main-lv (or new-main (ji:make-logic-variable-maker (intern (string-upcase "?new-main"))))))
+    (pushnew decoder-name *all-decoders*)
     `(defrule ,decoder-name (:backward)
-       then [is-appropriate-response ,verb ?main ,handler-name ,new-main ,return-args]
+       then [is-appropriate-response ,verb ?main ,handler-name ,new-main-lv ,return-args]
        if ,pattern)))
 
 (defmacro defhandler (name args &body body)
@@ -83,7 +103,7 @@
      (with-stack-list (derivation self truth-value 'all-properties)
                       (Funcall continuation derivation)))))
 
-(defparameter *syntactic-connectives* '(|has_clause_type| |has_tense| |has_person| |is_main| |has_rel_clause| |has_quantifier| |has_quantity| |has_modifier|))
+(defparameter *syntactic-connectives* '(|is_main| |is_negative| |has_clause_type| |has_tense| |has_person| |has_rel_clause| |has_quantifier| |has_quantity| |has_modifier|))
 
 (defun all-properties (entity &optional rels-to-exclude)
   (let ((answers nil))
@@ -117,7 +137,7 @@
 
 
 
-;;; This code should be moved into Recipes Core
+;;; This code should be moved into planning Core
 ;;; And appropriate symbols exported
 
 ;;; A tester for this
@@ -146,6 +166,14 @@
   ;; whatever handles he's coming needs to know that it's inside an utterance context.
   (defvar *embedding-context* nil))
 
+;;; The ask* in handle-sentence below can succeed multiple times.
+;;; For flexibility, we can allow the decoder to not bind the handler
+;;; and we'll ignore that one.  Of course, it could also just not succeed in such
+;;; cases.  Both will work given the code below.
+;;; However, if it binds the handler then we should throw out of handle-sentence.
+
+(defparameter *trace-decoder* nil)
+
 (defun enact-story (story-name &key (initial-state *initial-state*) (clear-first t) (file nil))
   (when clear-first (clear) (setq initial-state *initial-state*))
   (flush-knowledge-base "asist")
@@ -161,21 +189,31 @@
         (*embedding-context* nil))
     (labels ((handle-sentence (main verb)
                (setq verb (start::convert-start-string-to-lisp-atom verb))
-               (ask* `[is-appropriate-response ,verb ,main ?handler ?new-main ?args]
-                     ;; (format t "~%Response is ~a ~a ~a ~a" verb main ?handler ?args)
-                     (let ((putative-next-state (apply (joshua-logic-variable-value ?handler)
-                                                       (if (unbound-logic-variable-p ?new-main) main ?new-main)
-                                                       (copy-object-if-necessary ?args))))
-                       ;; make sure that the handler returned a state like it's supposed to
-                       ;; But it's possible that the handler didn't actually make a state change
-                       ;; in which case it should return the previous current state to indicate that
-                       (assert (typep putative-next-state 'state))
-                       ;; but it's possible that something asserted by an action could
-                       ;; cause another action to follow on.  For example, if an announcement is
-                       ;; made that someone intends to do something, then you might want to take
-                       ;; that action
-                       (setq *current-state* (end-of-state-chain putative-next-state)))))
+               (block find-one
+                 (ask* `[is-appropriate-response ,verb ,main ?handler ?new-main ?args]
+                       (when *trace-decoder* (format t "~%Response is ~a ~a ~a ~a" verb main ?handler ?args))
+                       (when (not (unbound-logic-variable-p ?handler))
+                         (let ((putative-next-state (apply (joshua-logic-variable-value ?handler)
+                                                           (if (unbound-logic-variable-p ?new-main) main ?new-main)
+                                                           (copy-object-if-necessary ?args))))
+                           ;; make sure that the handler returned a state like it's supposed to
+                           ;; But it's possible that the handler didn't actually make a state change
+                           ;; in which case it should return the previous current state to indicate that
+                           (assert (typep putative-next-state 'state))
+                           ;; but it's possible that something asserted by an action could
+                           ;; cause another action to follow on.  For example, if an announcement is
+                           ;; made that someone intends to do something, then you might want to take
+                           ;; that action
+                           (setq *current-state* (end-of-state-chain putative-next-state)))
+                         (return-from find-one))))
+               )
              (do-it (*standard-output*)
+               (let ((background-knowledge (story-background-knowledge story-name)))
+                 (when background-knowledge
+                   (format t "~%(Background knowledge:")
+                   (loop for sentence in background-knowledge
+                       do (print sentence))
+                   (format t "~%)")))
                (loop for utterance in (fetch-story story-name)
                    for parse = (parse utterance)
                    for number from 1
@@ -255,7 +293,8 @@
                (list (loop for thing in thing collect (do-a-level thing)))
                (state (state-name thing))
                (action (name thing))
-               (recipe-object (role-name thing)))))
+               (opaque-reference (describe-self thing))
+               (planning-object (role-name thing)))))
     (if (eql (predication-truth-value predication) +false+)
         `(not ,(do-a-level predication))
       (do-a-level predication))))

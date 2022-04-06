@@ -1,4 +1,4 @@
-;;; -*- Syntax: Ansi-common-lisp; Package: cl-USER; Base: 10; Mode: LISP -*- 
+;;; -*- Syntax: Ansi-common-lisp; Package: cl-USER; Base: 10; Mode: LISP -*-
 
 (in-package :cl-user)
 
@@ -12,10 +12,10 @@
          (home-dir (pathname-directory loading-file))
          (wild-dir (append (butlast home-dir) (list :wild-inferiors))))
     (setq *guide-home-directory* (make-pathname :directory home-dir
-                                                :host host 
+                                                :host host
                                                 :device device)
           *guide-wild-directory* (make-pathname :directory wild-dir
-                                                :host host 
+                                                :host host
                                                 :device device
                                                 :type :wild
                                                 :name :wild
@@ -37,22 +37,18 @@
              :test #'string-equal))
   )
 
-;;; I guess I could include start-interface and recipes in the defsystem and
-;;; a load file for their defsystems
 
 #+allegro
 (defsystem guide
     (:default-pathname "guide:code;"
         :default-module-class separate-destination-module)
   (:serial
-   ;; How to include these so that we don't recompile them when we recompile guide
-   ;; start-interface
-   ;; recipes-core
    ("package-definition")
    ("objects" (:module-class separate-destination-joshua-module))
    ("preliminaries" (:module-class separate-destination-joshua-module))
    ("predicates" (:module-class separate-destination-joshua-module))
    ("actions" (:module-class separate-destination-joshua-module))
-   ("story-1-processing" (:module-class separate-destination-joshua-module))
-   ("story-2-processing" (:module-class separate-destination-joshua-module))
+   ("extractors" (:module-class separate-destination-joshua-module))
+   ;; ("story-1-processing" (:module-class separate-destination-joshua-module))
+   ;; ("story-2-processing" (:module-class separate-destination-joshua-module))
    ))

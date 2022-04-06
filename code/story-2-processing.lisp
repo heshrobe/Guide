@@ -5,14 +5,14 @@
 
 ;;; #2 Someone discovers a critically injured victim and needs two other people who can help save the victim.
 (defstory save-critically-injured-victim
-  "Person1 is searching for victims when she discovers a critical victim."
-  "Person1 announces that she has discovered a critical victim and that she needs the help of two others in order to provide care"
-  ;; [Or from player PoV:
-  ;; I've discovered a critical victim and I need the help of two other people in order to provide care.]
-  "Person2 announces that she is on the way."
-  "Person3 announces that she is on the way."
-  "Later, all three people are next to the critical victim. One of them is holding a MEDKIT and begins to provide care."
-  )
+    :utterances ("Person1 is searching for victims when she discovers a critical victim."
+                 "Person1 announces that she has discovered a critical victim and that she needs the help of two others in order to provide care"
+                 ;; [Or from player PoV:
+                 ;; I've discovered a critical victim and I need the help of two other people in order to provide care.]
+                 "Person2 announces that she is on the way."
+                 "Person3 announces that she is on the way."
+                 "Later, all three people are next to the critical victim. One of them is holding a MEDKIT and begins to provide care."
+                 ))
 
 
 

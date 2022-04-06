@@ -26,10 +26,15 @@
       (tell predication)))
   )
 
-(defun clause-is-negated (main)
-  (ask* `[texp-match ?clause :subject ,main :relation-name |is_negative| :object-name |yes|]
-        (return-from clause-is-negated t))
-  nil)
+(defun clause-is-negated (main &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|is_negative| all-properties)))
+      (block do-query
+        (ask* `[texp-match ?clause :subject ,main :relation-name |is_negative| :object-name ?negative]
+              (setq answer ?negative)
+              (return-from do-query t))))
+      (when answer (convert-start-string-to-lisp-atom answer))))
 
 (defun get-temporal-property-of-clause (main)
   (ask* `[texp-match ?clause :subject ,main :relation-name ?time-relation :object ?property]
@@ -37,7 +42,7 @@
           (ask* [texp-match ? :subject ?property :relation-name |related-to| :object ?time-point]
                 (return-from get-temporal-property-of-clause (values ?time-relation ?property ?time-point)))
           (return-from get-temporal-property-of-clause (values ?time-relation ?property))))
-  nil)
+  )
 
 (defun is-anonymous-with-referent (object properties)
   (declare (ignore object))
@@ -87,6 +92,36 @@
               (return-from do-query))))
     (when answer (convert-start-string-to-lisp-atom answer))))
 
+(defun has-modifier (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_modifier| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_modifier| :object-name ?quantification]
+              (setq answer ?quantification)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
+(defun has-property (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|has_property| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |has_property| :object-name ?property]
+              (setq answer ?property)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
+(defun related-to (instance &optional (all-properties nil properties-supplied-p))
+  (let ((answer nil))
+    (if properties-supplied-p
+        (setq answer (second (assoc '|relaed-to| all-properties)))
+      (block do-query
+        (ask* `[texp-match ? :subject ,instance :relation-name |related-to| :object-name ?property]
+              (setq answer ?property)
+              (return-from do-query))))
+    (when answer (convert-start-string-to-lisp-atom answer))))
+
 (defun has-relative-clause (thing)
   (ask* `[texp-match ? :subject ,thing :relation-name |has_rel_clause| :object ?rel-clause]
         (return-from has-relative-clause ?rel-clause))
@@ -96,3 +131,8 @@
   (if (symbolp thing)
       (convert-start-string-to-lisp-atom thing)
     (convert-start-string-to-lisp-atom (name thing))))
+
+(defun long-name (thing)
+  (if (symbolp thing)
+      (convert-start-string-to-lisp-atom thing)
+    (convert-start-string-to-lisp-atom (full-name thing))))

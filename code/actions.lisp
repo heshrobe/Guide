@@ -20,6 +20,20 @@
   :post-conditions ([not [is-in-vacinity ?person ?current-vacinity]]
                     [is-in-vacinity ?person ?destination]))
 
+(define-action take-to (?actor ?object ?current-vacinity ?destination)
+  :typing ((?current-vacinity vacinity)
+           (?destination vacinity)
+           (?object person)
+           (?actor person))
+  :prerequisites ([is-in-vacinity ?actor ?current-vacinity]
+                  [is-in-vacinity ?object ?current-vacinity]
+                  [is-in-condition ?actor mobile])
+  :post-conditions ([not [is-in-vacinity ?actor ?current-vacinity]]
+                    [not [is-in-vacinity ?object ?current-vacinity]]
+                    [has-taken-to ?actor ?object ?destination]
+                    [is-in-vacinity ?actor ?destination]
+                    [is-in-vacinity ?object ?destination]))
+
 (define-fwrd-stateful-rule moving-means-not-on-freeze-tile
     :if [and [is-moving-around ?person ?someplace]
              [object-type-of ?person person]
@@ -173,9 +187,25 @@
   :post-conditions ([is-in-vacinity ?actors ?place])
   )
 
-(define-action give-care (?team ?victim)
-  :typing ((?team treatment-team)
+(define-action give-care (?giver ?victim)
+  :typing ((?giver medical-specialist)
            (?victim victim))
   :bindings ([is-in-vacinity ?victim ?victim-place])
-  :prerequisites ([is-in-vacinity ?team ?victim-place])
-  :post-conditions ([is-providing-care ?team ?victim]))
+  :prerequisites ([is-in-vacinity ?giver ?victim-place])
+  :post-conditions ([is-providing-care ?giver ?victim]))
+
+
+#|
+
+;;; a test case for the macro expander
+
+(define-action foo (?actors ?place)
+  :typing ((?actors collection)
+           (?place vacinity))
+  :prerequisites ([value-of ?actors.member-type player]
+                  [can-be-given-at ?actors.member-type care]
+                  [has-shared-information ?actors])
+  :post-conditions ([is-in-vacinity ?actors ?place])
+  )
+
+|#

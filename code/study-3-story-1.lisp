@@ -3,8 +3,8 @@
 (in-package :guide)
 
 (defstory study-3-1
-    "At the start of the game, the evacuation specialist didn't have any victims that needed to be transported."
-  "He took the opportunity to scout out and mark victim locations.")
+    :utterances ("At the start of the game, the evacuation specialist didn't have any victims that needed to be transported."
+                 "He took the opportunity to scout out and mark victim locations."))
 
 (defdecoder have
     :handler-name ?the-right-handler
@@ -41,7 +41,7 @@
       (cond
        ;; there will be other cases, but this is the one I care about now
        ;; the object is quantified by any
-       ((and (eql determiner '|any|) 
+       ((and (eql determiner '|any|)
              (eql quantifier '|any|)
              (eql number '|plural|)
              (not (null relative-clause)))
@@ -50,7 +50,7 @@
               ;; There are two cases here:
               ;; 1) The object is just an object
               ;; 2) The object is a texp
-              (cond 
+              (cond
                ((typep ?object-of-rel-clause 'start::texp)
                 (ask* `[texp-match ?object-of-rel-clause :subject ,object :relation-name ?rel-name :object-name ?object-of-clause]
                       (tell `[in-state [for-all (x) [not [and [instance-of x ,object-type] [has ,the-subject x] [needs x ,(find-infinitive-of-verb ?object-of-clause)]]]] initial])))))))))
@@ -74,4 +74,3 @@
               (do-action action-name *current-state* before-state after-state actor real-object)
               ;; remember to return the new state
               (return-from do-it after-state))))))
-        

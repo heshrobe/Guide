@@ -3,10 +3,10 @@
 (in-package :guide)
 
 (defstory rescue-frozen-user
-    "Person1 is moving around in the building and accidentally stands on a freeze tile"
-  "Person1 calls out for help.  I'm frozen.  Please come and unfreeze me."
-  "Person2 has the medkit. Person2 arrives. Person2 unfreezes Person1.  Person1 resumes working."
-  )
+    :utterances ("Person1 is moving around in the building and accidentally stands on a freeze tile"
+                 "Person1 calls out for help.  I'm frozen.  Please come and unfreeze me."
+                 "Person2 has the medkit. Person2 arrives. Person2 unfreezes Person1.  Person1 resumes working."
+                 ))
 
 
 

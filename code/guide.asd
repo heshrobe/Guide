@@ -2,6 +2,13 @@
 
 (in-package :cl-user)
 
+;;; Make swank aware of the right readtable
+#+swank
+(pushnew (cons "GUIDE" ji::*joshua-readtable*)
+	 swank:*readtable-alist*
+	 :key #'first
+	 :test #'string=)
+
 (defvar *guide-home-directory* :not-yet)
 (defvar *guide-wild-directory* :not-yet)
 
@@ -41,15 +48,16 @@
 (asdf:defsystem guide
   :name "Guide"
   :description "Story Parsing and Interpretation Guide"
-  :depends-on (:Recipes/core)
+  :depends-on (:planning-interface :joshua)
   :maintainer "Howie Shrobe"
   :pathname "."
+  :serial t
   :components
   ((:file "package-definition")
-   (:joshua-file "objects" :depends-on ("package-definition"))
-   (:joshua-file "preliminaries" :depends-on ("objects"))
-   (:joshua-file "predicates" :depends-on ("objects"))
-   (:joshua-file "actions" :depends-on ("predicates"))
-   (:joshua-file "story-1-processing" :depends-on ("actions"))
-   (:joshua-file "story-2-processing" :depends-on ("actions"))
+   (:joshua-file "objects")
+   (:joshua-file "preliminaries")
+   (:joshua-file "predicates")
+   (:joshua-file "actions")
+   (:joshua-file "extractors")
+   (:joshua-file "study-3-stories")
    ))

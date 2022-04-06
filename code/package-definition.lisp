@@ -2,7 +2,7 @@
 
 
 (defpackage guide
-  (:use recipes start joshua common-lisp)
+  (:use planning-core start joshua common-lisp)
+  (:shadowing-import-from planning-core part-of value-of object-type-of named-part-of)
   (:shadow room)
-  (:import-from ltms assume)
-  (:shadowing-import-from recipes object-type-of value-of))
+  (:import-from ltms assume))
