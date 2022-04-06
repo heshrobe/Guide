@@ -48,7 +48,7 @@
 (asdf:defsystem guide
   :name "Guide"
   :description "Story Parsing and Interpretation Guide"
-  :depends-on (:planning-interface :joshua)
+  :depends-on (:planning-core :joshua)
   :maintainer "Howie Shrobe"
   :pathname "."
   :serial t
