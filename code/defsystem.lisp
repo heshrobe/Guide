@@ -49,6 +49,7 @@
    ("predicates" (:module-class separate-destination-joshua-module))
    ("actions" (:module-class separate-destination-joshua-module))
    ("extractors" (:module-class separate-destination-joshua-module))
+   ("study-3-stories" (:module-class separate-destination-joshua-module))
    ;; ("story-1-processing" (:module-class separate-destination-joshua-module))
    ;; ("story-2-processing" (:module-class separate-destination-joshua-module))
    ))

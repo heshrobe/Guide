@@ -136,3 +136,10 @@
   (if (symbolp thing)
       (convert-start-string-to-lisp-atom thing)
     (convert-start-string-to-lisp-atom (full-name thing))))
+
+
+(defun value-in-state (object property &optional (state *current-state*))
+  (block got-it
+    (ask* `[in-state [value-of (,object ,property) ?the-value] ,state]
+          (return-from got-it ?the-value))
+    nil))

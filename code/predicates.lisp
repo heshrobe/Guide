@@ -31,7 +31,7 @@
 (define-planning-predicate has-begun (person predication) ())
 
 ;;; The things needed is an object like help or clear
-(define-planning-predicate needs (actor thing-needed &rest other-stuff) ())
+(define-planning-predicate needs-in-order-to (actor thing-needed enabled-thing) ())
 
 (define-planning-predicate purpose (thing1 thing2) ())
 
@@ -71,3 +71,7 @@
 (define-planning-predicate colocated-at (who place) ())
 (define-planning-predicate has-taken-to (actor object location) ())
 (define-planning-predicate incorrect-area (evacuation-area victim) ())
+
+(define-planning-predicate takes-action (action-name state actor &rest args) ())
+(define-planning-predicate team-isnt-big-enough (team set-size-restriction goal) ())
+(define-planning-predicate team-is-big-enough (team set-size-restriction goal) ())

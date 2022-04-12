@@ -175,7 +175,9 @@
 (defparameter *trace-decoder* nil)
 
 (defun enact-story (story-name &key (initial-state *initial-state*) (clear-first t) (file nil))
-  (when clear-first (clear) (setq initial-state *initial-state*))
+  (when clear-first
+    (clear)
+    (setq initial-state *initial-state*))
   (flush-knowledge-base "asist")
   (let ((*current-state* initial-state)
         (*actors* nil)
@@ -205,8 +207,7 @@
                            ;; made that someone intends to do something, then you might want to take
                            ;; that action
                            (setq *current-state* (end-of-state-chain putative-next-state)))
-                         (return-from find-one))))
-               )
+                         (return-from find-one)))))
              (do-it (*standard-output*)
                (let ((background-knowledge (story-background-knowledge story-name)))
                  (when background-knowledge

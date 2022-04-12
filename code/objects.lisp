@@ -62,6 +62,7 @@
 
 (define-planning-object-type specialist
     :super-types (player)
+    :slots ((team))
     )
 
 (define-planning-object-type medical-specialist
@@ -226,3 +227,17 @@
 (defmethod describe-self ((thing opaque-reference) &optional (state (intern-state 'initial)))
   (declare (ignore state))
   `(the ,(property-name thing) of ,(describe-self (the-object thing))))
+
+(define-planning-object-type set-size-restriction
+    :super-types (abstract-thing)
+    :slots ((numeric-relation :initarg :Numeric-relation)
+            (limit :initarg limit)
+            (collection :Initarg :collection)
+            ))
+
+(defmethod describe-self ((thing set-size-restriction) &optional (state (intern-state 'initial)))
+  (declare (ignore state))
+  `(size-of ,(describe-self (collection thing))
+            must-be
+    ,(numeric-relation thing)
+    ,(limit thing)))
